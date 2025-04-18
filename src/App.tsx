@@ -1,6 +1,7 @@
 import { useState } from "react";
 import axios from "axios";
 import Plot from "react-plotly.js";
+import TcpNtcpPlot from "./components/TcpNtcpPlot";
 
 import {
   Container,
@@ -188,6 +189,7 @@ export default function App() {
             >
               <Tab label="Cell survival" />
               <Tab label="TCP / NTCP" />
+              <Tab label="TCP / NTCP (shaded)" />
             </Tabs>
 
             {/* ---- Tab 0 : Survival line ---- */}
@@ -222,6 +224,16 @@ export default function App() {
             )}
           </Box>
         )}
+
+        {tab === 2 && (
+          <TcpNtcpPlot
+            eqd2={res.eqd2}
+            tumour={tumourOptions[tumourIdx]}
+            oar={oarOptions[oarIdx]}
+            shaded
+          />
+        )}
+
       </Paper>
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
