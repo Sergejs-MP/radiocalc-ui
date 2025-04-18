@@ -43,21 +43,6 @@ export default function App() {
   const [tumourIdx, setTumourIdx] = useState(0);
   const [oarIdx, setOarIdx] = useState(0);
 
-  const handleChange =
-    (key: keyof typeof inp) => (e: React.ChangeEvent<HTMLInputElement>) =>
-      setInp({ ...inp, [key]: +e.target.value });
-
-  const handleTumourSelect = (e: any) => {
-    const idx = e.target.value as number;
-    setTumourIdx(idx);
-    setInp({ ...inp, abTumor: tumourOptions[idx].ab });   // auto‑fill α/β
-  };
-  const handleOarSelect = (e: any) => {
-    const idx = e.target.value as number;
-    setOarIdx(idx);
-    setInp({ ...inp, abOAR: oarOptions[idx].ab });
-  };
-
   const calc = async () => {
     setLoading(true);
     try {
