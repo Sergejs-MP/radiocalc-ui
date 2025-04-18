@@ -1,4 +1,71 @@
-[
-    { "label": "Spinal cord (α/β 3 Gy)", "ab": 3, "D50": 50, "gamma50": 1.0 },
-    { "label": "Lung late (α/β 3 Gy)",   "ab": 3, "D50": 30, "gamma50": 0.8 }
-  ]
+from fastapi import FastAPI
+from pydantic import BaseModel
+import math
+
+class CalcRequest(BaseModel):
+    # existing fields...
+
+class CalcResponse(BaseModel):
+    # existing fields...
+
+class GapRequest(BaseModel):
+    dose_per_fraction: float               # original d (Gy)
+    num_fractions: int                     # original n
+    alpha_beta: float                      # α/β (Gy) – tumour or target tissue
+    missed_days: int                       # days of unscheduled gap
+    kickoff_days: int = 28                 # T_k (days when repop starts)
+    dose_loss_per_day: float = 0.9         # K (Gy BED/day)
+
+class GapResponse(BaseModel):
+    bed_lost: float                        # Gy BED lost due to gap
+    eqd2_lost: float                       # Gy EQD2 lost
+    extra_physical_dose: float             # Gy physical dose required
+    extra_fractions: int                   # whole extra fractions at same d
+
+# existing functions...
+
+def calculate_gap_compensation(
+    d: float,
+    n: int,
+    alpha_beta: float,
+    missed_days: int,
+    kickoff_days: int,
+    k_bed_per_day: float,
+):
+    """
+    Returns a dict with BED lost, EQD2 lost, extra Gy and extra fractions
+    needed to compensate for an unscheduled gap.
+    """
+    # BED lost only for days beyond kickoff
+    gap_bed_loss = 0.0
+    if missed_days > 0:
+        gap_bed_loss = k_bed_per_day * max(0, missed_days)
+
+    eqd2_loss = calculate_eqd2(gap_bed_loss, alpha_beta)
+
+    # Extra physical Gy required to restore BED:
+    #   extra_BED = gap_bed_loss = extra_dose * (1 + d/αβ)
+    extra_Gy = gap_bed_loss / (1 + d / alpha_beta) if d > 0 else 0.0
+
+    extra_fracs = math.ceil(extra_Gy / d) if d > 0 else 0
+
+    return {
+        "bed_lost": round(gap_bed_loss, 2),
+        "eqd2_lost": round(eqd2_loss, 2),
+        "extra_physical_dose": round(extra_Gy, 1),
+        "extra_fractions": int(extra_fracs),
+    }
+
+@app.post("/gap_compensation", response_model=GapResponse)
+def gap_compensation(req: GapRequest):
+    result = calculate_gap_compensation(
+        d=req.dose_per_fraction,
+        n=req.num_fractions,
+        alpha_beta=req.alpha_beta,
+        missed_days=req.missed_days,
+        kickoff_days=req.kickoff_days,
+        k_bed_per_day=req.dose_loss_per_day,
+    )
+    return result
+
+# existing endpoints...
