@@ -23,6 +23,12 @@ import {
 // backend URL
 const API = import.meta.env.VITE_API + "/calculate";
 
+interface GapResult {
+  bed_lost: number;
+  eqd2_lost: number;
+  extra_physical_dose: number;
+  extra_fractions: number;
+}
 // result type from backend
 interface Result {
   total_dose: number;
@@ -30,6 +36,7 @@ interface Result {
   eqd2: number;
   time_corrected_bed: number;
   survival_fraction: number;
+  gap?: GapResult;  
 }
 
 // preset dropdown options
@@ -42,6 +49,7 @@ export default function App() {
     d: 2,
     n: 30,
     t: 40,
+    gap: 0, 
     abTumour: 10,
     abOAR: 3,
   });
@@ -75,13 +83,30 @@ export default function App() {
   const calc = async () => {
     setLoading(true);
     try {
+      // 1. normal BED/EQD2 request
       const { data } = await axios.post<Result>(API, {
         dose_per_fraction: inp.d,
         number_of_fractions: inp.n,
         treatment_time: inp.t,
         alpha_beta: inp.abTumour,
       });
-      setRes(data);
+  
+      // 2. gap‑compensation request (only if gap > 0)
+      let gapData: GapResult | undefined = undefined;
+      if (inp.gap && inp.gap > 0) {
+        const { data: gapRes } = await axios.post<GapResult>(
+          API.replace("/calculate", "/gap_compensation"),
+          {
+            dose_per_fraction: inp.d,
+            num_fractions: inp.n,
+            alpha_beta: inp.abTumour,
+            missed_days: inp.gap,
+          }
+        );
+        gapData = gapRes;
+      }
+  
+      setRes({ ...data, gap: gapData });
       setTab(0);
     } catch (err) {
       console.error(err);
@@ -158,13 +183,19 @@ export default function App() {
             value={inp.t}
             onChange={handleChange("t")}
           />
+          <TextField
+            label="Missed days (gap)"
+            type="number"
+            value={inp.gap}
+            onChange={handleChange("gap")}
+          />
 
           <Button
             variant="contained"
             onClick={calc}
             disabled={
               loading ||
-              [inp.d, inp.n, inp.t, inp.abTumour].some(
+              [inp.d, inp.n, inp.t, inp.abTumour, inp.gap].some(
                 (v) => v === undefined || v === null || v === 0
               )
             }
@@ -185,7 +216,15 @@ export default function App() {
             >
               {JSON.stringify(res, null, 2)}
             </pre>
-
+            {res?.gap && (
+              <Box sx={{ mb: 2, p: 2, bgcolor: "#eef" }}>
+                Lost&nbsp;<b>{res.gap.bed_lost}</b>&nbsp;Gy BED&nbsp;
+                (<b>{res.gap.eqd2_lost}</b>&nbsp;Gy EQD₂); need&nbsp;
+                <b>{res.gap.extra_physical_dose}</b>&nbsp;Gy ≈&nbsp;
+                <b>{res.gap.extra_fractions}</b>&nbsp;extra&nbsp;fraction
+                {res.gap.extra_fractions !== 1 && "s"}.
+              </Box>
+            )}
             <Tabs
               value={tab}
               onChange={(_, v) => setTab(v)}
