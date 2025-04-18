@@ -42,7 +42,13 @@ const oarOptions = [
 ] as const;
 
 export default function App() {
-  const [inp, setInp] = useState({ d: 2, n: 30, t: 40, ab: 10 });
+  const [inp, setInp] = useState({
+    d: 2,
+    n: 30,
+    t: 40,
+    abTumor: 10,
+    abOAR: 3,
+  });
   const [res, setRes] = useState<Result | null>(null);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -56,9 +62,13 @@ export default function App() {
   const handleTumourSelect = (e: any) => {
     const idx = e.target.value as number;
     setTumourIdx(idx);
-    setInp({ ...inp, ab: tumourOptions[idx].ab });   // auto‑fill α/β
+    setInp({ ...inp, abTumor: tumourOptions[idx].ab });   // auto‑fill α/β
   };
-  const handleOarSelect = (e: any) => setOarIdx(e.target.value as number);
+  const handleOarSelect = (e: any) => {
+    const idx = e.target.value as number;
+    setOarIdx(idx);
+    setInp({ ...inp, abOAR: oarOptions[idx].ab });
+  };
 
   const calc = async () => {
     setLoading(true);
@@ -67,7 +77,7 @@ export default function App() {
         dose_per_fraction: inp.d,
         number_of_fractions: inp.n,
         treatment_time: inp.t,
-        alpha_beta: inp.ab,
+        alpha_beta: inp.abTumor,    // backend uses tumour α/β
       });
       setRes(data);
       setTab(0); // always show survival tab first
@@ -123,6 +133,18 @@ export default function App() {
           </FormControl>
 
           <TextField
+            label="α / β Tumor (Gy)"
+            type="number"
+            value={inp.abTumor}
+            onChange={handleChange("abTumor")}
+          />
+          <TextField
+            label="α / β Normal tissue (Gy)"
+            type="number"
+            value={inp.abOAR}
+            onChange={handleChange("abOAR")}
+          />
+          <TextField
             label="Dose / fraction (Gy)"
             type="number"
             value={inp.d}
@@ -140,16 +162,13 @@ export default function App() {
             value={inp.t}
             onChange={handleChange("t")}
           />
-          <TextField
-            label="α / β (Gy)"
-            type="number"
-            value={inp.ab}
-            onChange={handleChange("ab")}
-          />
           <Button
             variant="contained"
             onClick={calc}
-            disabled={loading || Object.values(inp).some((v) => !v)}
+            disabled={
+              loading ||
+              [inp.d, inp.n, inp.t, inp.abTumor].some((v) => !v && v !== 0)
+            }
           >
             {loading ? "Calculating…" : "Calculate"}
           </Button>
