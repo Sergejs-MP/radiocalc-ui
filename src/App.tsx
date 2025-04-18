@@ -30,17 +30,9 @@ interface Result {
   survival_fraction: number;
 }
 
-// ----------- preset tissue options -----------
-const tumourOptions = [
-  { label: "Generic tumour (α/β 10 Gy)", ab: 10, D50: 60, gamma50: 2.5 },
-  { label: "Prostate (α/β 1.5 Gy)",       ab: 1.5, D50: 75, gamma50: 2.0 },
-] as const;
-
-const oarOptions = [
-  { label: "Spinal cord (α/β 3 Gy)",      ab: 3, D50: 50, gamma50: 1.0 },
-  { label: "Lung late (α/β 3 Gy)",        ab: 3, D50: 30, gamma50: 0.8 },
-] as const;
-
+// ----------- load preset tissue options -----------
+import tumourOptions from "./data/tumour_presets.json";
+import oarOptions    from "./data/oar_presets.json";
 export default function App() {
   const [inp, setInp] = useState({
     d: 2,
