@@ -13,6 +13,10 @@ import {
   Box,
   Backdrop,
   CircularProgress,
+  FormControl,
+  InputLabel,
+  MenuItem,
+  Select,
 } from "@mui/material";
 
 // backend URL comes from .env → VITE_API
@@ -26,15 +30,35 @@ interface Result {
   survival_fraction: number;
 }
 
+// ----------- preset tissue options -----------
+const tumourOptions = [
+  { label: "Generic tumour (α/β 10 Gy)", ab: 10, D50: 60, gamma50: 2.5 },
+  { label: "Prostate (α/β 1.5 Gy)",       ab: 1.5, D50: 75, gamma50: 2.0 },
+] as const;
+
+const oarOptions = [
+  { label: "Spinal cord (α/β 3 Gy)",      ab: 3, D50: 50, gamma50: 1.0 },
+  { label: "Lung late (α/β 3 Gy)",        ab: 3, D50: 30, gamma50: 0.8 },
+] as const;
+
 export default function App() {
   const [inp, setInp] = useState({ d: 2, n: 30, t: 40, ab: 10 });
   const [res, setRes] = useState<Result | null>(null);
   const [tab, setTab] = useState(0);
   const [loading, setLoading] = useState(false);
+  const [tumourIdx, setTumourIdx] = useState(0);
+  const [oarIdx, setOarIdx] = useState(0);
 
   const handleChange =
     (key: keyof typeof inp) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setInp({ ...inp, [key]: +e.target.value });
+
+  const handleTumourSelect = (e: any) => {
+    const idx = e.target.value as number;
+    setTumourIdx(idx);
+    setInp({ ...inp, ab: tumourOptions[idx].ab });   // auto‑fill α/β
+  };
+  const handleOarSelect = (e: any) => setOarIdx(e.target.value as number);
 
   const calc = async () => {
     setLoading(true);
@@ -72,6 +96,32 @@ export default function App() {
 
         {/* ---------- input fields ---------- */}
         <Stack spacing={2}>
+          <FormControl fullWidth>
+            <InputLabel>Tumour model</InputLabel>
+            <Select
+              value={tumourIdx}
+              label="Tumour model"
+              onChange={handleTumourSelect}
+            >
+              {tumourOptions.map((opt, i) => (
+                <MenuItem key={opt.label} value={i}>{opt.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
+          <FormControl fullWidth>
+            <InputLabel>Normal tissue model</InputLabel>
+            <Select
+              value={oarIdx}
+              label="Normal tissue model"
+              onChange={handleOarSelect}
+            >
+              {oarOptions.map((opt, i) => (
+                <MenuItem key={opt.label} value={i}>{opt.label}</MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+
           <TextField
             label="Dose / fraction (Gy)"
             type="number"
@@ -152,7 +202,12 @@ export default function App() {
 
             {/* ---- Tab 1 : TCP / NTCP S‑curves ---- */}
             {tab === 1 && (
-              <TcpNtcpPlot eqd2={res.eqd2} buildSigmoid={buildSigmoid} />
+              <TcpNtcpPlot
+                eqd2={res.eqd2}
+                buildSigmoid={buildSigmoid}
+                tumour={tumourOptions[tumourIdx]}
+                oar={oarOptions[oarIdx]}
+              />
             )}
           </Box>
         )}
@@ -171,14 +226,14 @@ export default function App() {
 function TcpNtcpPlot({
   eqd2,
   buildSigmoid,
+  tumour,
+  oar,
 }: {
   eqd2: number;
   buildSigmoid: (D50: number, gamma50: number, doses: number[]) => number[];
+  tumour: { D50: number; gamma50: number; label: string };
+  oar: { D50: number; gamma50: number; label: string };
 }) {
-  // reference params (adjust or make them inputs later)
-  const tumour = { D50: 60, gamma50: 2.5, label: "TCP (tumour)" };
-  const cord = { D50: 50, gamma50: 1.0, label: "NTCP (cord)" };
-
   const doseAxis = Array.from({ length: 101 }, (_, i) => i); // 0‑100 Gy
 
   return (
@@ -193,8 +248,8 @@ function TcpNtcpPlot({
         },
         {
           x: doseAxis,
-          y: buildSigmoid(cord.D50, cord.gamma50, doseAxis),
-          name: cord.label,
+          y: buildSigmoid(oar.D50, oar.gamma50, doseAxis),
+          name: oar.label,
           type: "scatter",
           mode: "lines",
         },
