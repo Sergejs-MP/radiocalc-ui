@@ -11,6 +11,8 @@ import {
   Tabs,
   Tab,
   Box,
+  Backdrop,
+  CircularProgress,
 } from "@mui/material";
 
 // backend URL comes from .env → VITE_API
@@ -28,20 +30,29 @@ export default function App() {
   const [inp, setInp] = useState({ d: 2, n: 30, t: 40, ab: 10 });
   const [res, setRes] = useState<Result | null>(null);
   const [tab, setTab] = useState(0);
+  const [loading, setLoading] = useState(false);
 
   const handleChange =
     (key: keyof typeof inp) => (e: React.ChangeEvent<HTMLInputElement>) =>
       setInp({ ...inp, [key]: +e.target.value });
 
   const calc = async () => {
-    const { data } = await axios.post<Result>(API, {
-      dose_per_fraction: inp.d,
-      number_of_fractions: inp.n,
-      treatment_time: inp.t,
-      alpha_beta: inp.ab,
-    });
-    setRes(data);
-    setTab(0); // always show survival tab first
+    setLoading(true);
+    try {
+      const { data } = await axios.post<Result>(API, {
+        dose_per_fraction: inp.d,
+        number_of_fractions: inp.n,
+        treatment_time: inp.t,
+        alpha_beta: inp.ab,
+      });
+      setRes(data);
+      setTab(0); // always show survival tab first
+    } catch (err) {
+      console.error(err);
+      alert("Calculation failed – see console");
+    } finally {
+      setLoading(false);
+    }
   };
 
   /*************************   TCP / NTCP helper  *************************/
@@ -88,9 +99,9 @@ export default function App() {
           <Button
             variant="contained"
             onClick={calc}
-            disabled={Object.values(inp).some((v) => !v)}
+            disabled={loading || Object.values(inp).some((v) => !v)}
           >
-            Calculate
+            {loading ? "Calculating…" : "Calculate"}
           </Button>
         </Stack>
 
@@ -146,6 +157,12 @@ export default function App() {
           </Box>
         )}
       </Paper>
+      <Backdrop
+        sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
+        open={loading}
+      >
+        <CircularProgress color="inherit" />
+      </Backdrop>
     </Container>
   );
 }
