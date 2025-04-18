@@ -6,7 +6,6 @@ import TcpNtcpPlot from "./components/TcpNtcpPlot";
 import {
   Container,
   Paper,
-  TextField,
   Button,
   Stack,
   Tabs,
@@ -14,10 +13,6 @@ import {
   Box,
   Backdrop,
   CircularProgress,
-  FormControl,
-  InputLabel,
-  MenuItem,
-  Select,
 } from "@mui/material";
 
 // backend URL comes from .env → VITE_API
