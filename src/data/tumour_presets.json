@@ -1,0 +1,4 @@
+[
+    { "label": "Generic tumour (α/β 10 Gy)", "ab": 10,  "D50": 60, "gamma50": 2.5 },
+    { "label": "Prostate (α/β 1.5 Gy)",      "ab": 1.5, "D50": 75, "gamma50": 2.0 }
+  ]

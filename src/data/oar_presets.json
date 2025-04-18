@@ -1,0 +1,4 @@
+[
+    { "label": "Spinal cord (α/β 3 Gy)", "ab": 3, "D50": 50, "gamma50": 1.0 },
+    { "label": "Lung late (α/β 3 Gy)",   "ab": 3, "D50": 30, "gamma50": 0.8 }
+  ]
