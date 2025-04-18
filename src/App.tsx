@@ -195,9 +195,10 @@ export default function App() {
             onClick={calc}
             disabled={
               loading ||
-              [inp.d, inp.n, inp.t, inp.abTumour, inp.gap].some(
+              [inp.d, inp.n, inp.t, inp.abTumour].some(
                 (v) => v === undefined || v === null || v === 0
-              )
+              ) ||
+              inp.gap < 0
             }
           >
             {loading ? "Calculating…" : "Calculate"}
