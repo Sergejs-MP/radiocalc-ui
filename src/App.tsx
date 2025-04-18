@@ -222,8 +222,7 @@ export default function App() {
                 oar={oarOptions[oarIdx]}
               />
             )}
-          </Box>
-        )}
+
 
         {tab === 2 && (
           <TcpNtcpPlot
@@ -233,6 +232,9 @@ export default function App() {
             shaded
           />
         )}
+      </Box>
+
+      )}
 
       </Paper>
       <Backdrop
