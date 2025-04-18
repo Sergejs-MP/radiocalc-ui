@@ -167,76 +167,69 @@ export default function App() {
           </Button>
         </Stack>
 
-        {/* ---------- results ---------- */}
-        {res && (
-          <Box sx={{ mt: 4 }}>
-            <pre
-              style={{
-                background: "#f5f5f5",
-                padding: 10,
-                whiteSpace: "pre-wrap",
-              }}
-            >
-              {JSON.stringify(res, null, 2)}
-            </pre>
+{/* ---------- results ---------- */}
+{res && (
+  <Box sx={{ mt: 4 }}>
+    <pre
+      style={{
+        background: "#f5f5f5",
+        padding: 10,
+        whiteSpace: "pre-wrap",
+      }}
+    >
+      {JSON.stringify(res, null, 2)}
+    </pre>
 
-            {/* tabs */}
-            <Tabs
-              value={tab}
-              onChange={(_, v) => setTab(v)}
-              centered
-              sx={{ mb: 1 }}
-            >
-              <Tab label="Cell survival" />
-              <Tab label="TCP / NTCP" />
-              <Tab label="TCP / NTCP (shaded)" />
-            </Tabs>
+    {/* tabs */}
+    <Tabs value={tab} onChange={(_, v) => setTab(v)} centered sx={{ mb: 1 }}>
+      <Tab label="Cell survival" />
+      <Tab label="TCP / NTCP (lines)" />
+      <Tab label="TCP / NTCP (shaded)" />
+    </Tabs>
 
-            {/* ---- Tab 0 : Survival line ---- */}
-            {tab === 0 && (
-              <Plot
-                data={[
-                  {
-                    x: [0, res.total_dose],
-                    y: [1, res.survival_fraction],
-                    type: "scatter",
-                    mode: "lines+markers",
-                    name: "Tumour survival",
-                  },
-                ]}
-                layout={{
-                  title: "Cell survival (semi‑log)",
-                  yaxis: { type: "log", title: "Surviving fraction" },
-                  xaxis: { title: "Physical dose (Gy)" },
-                }}
-                style={{ width: "100%", height: 400 }}
-              />
-            )}
+    {/* ---- Tab 0 : Survival line ---- */}
+    {tab === 0 && (
+      <Plot
+        data={[
+          {
+            x: [0, res.total_dose],
+            y: [1, res.survival_fraction],
+            type: "scatter",
+            mode: "lines+markers",
+            name: "Tumour survival",
+          },
+        ]}
+        layout={{
+          title: "Cell survival (semi‑log)",
+          yaxis: { type: "log", title: "Surviving fraction" },
+          xaxis: { title: "Physical dose (Gy)" },
+        }}
+        style={{ width: "100%", height: 400 }}
+      />
+    )}
 
-            {/* ---- Tab 1 : TCP / NTCP S‑curves ---- */}
-            {tab === 1 && (
-              <TcpNtcpPlot
-                eqd2={res.eqd2}
-                buildSigmoid={buildSigmoid}
-                tumour={tumourOptions[tumourIdx]}
-                oar={oarOptions[oarIdx]}
-              />
-            )}
+    {/* ---- Tab 1 : TCP / NTCP lines ---- */}
+    {tab === 1 && (
+      <TcpNtcpPlot
+        eqd2={res.eqd2}
+        tumour={tumourOptions[tumourIdx]}
+        oar={oarOptions[oarIdx]}
+      />
+    )}
 
+    {/* ---- Tab 2 : TCP / NTCP shaded ---- */}
+    {tab === 2 && (
+      <TcpNtcpPlot
+        eqd2={res.eqd2}
+        tumour={tumourOptions[tumourIdx]}
+        oar={oarOptions[oarIdx]}
+        shaded
+      />
+    )}
+  </Box>
+)} {/* ← closes  {res && (...)} */}
 
-        {tab === 2 && (
-          <TcpNtcpPlot
-            eqd2={res.eqd2}
-            tumour={tumourOptions[tumourIdx]}
-            oar={oarOptions[oarIdx]}
-            shaded
-          />
-        )}
-      </Box>
-
-      )}
-
-      </Paper>
+</Paper>  {/* closes <Paper sx={{ p:3 }}> */}
       <Backdrop
         sx={{ color: "#fff", zIndex: (theme) => theme.zIndex.drawer + 1 }}
         open={loading}
