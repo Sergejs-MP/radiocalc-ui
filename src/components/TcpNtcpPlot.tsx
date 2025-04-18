@@ -45,7 +45,7 @@ export default function TcpNtcpPlot({
           name: oar.label,
           type: "scatter",
           mode: "lines",
-          ...(shaded && { fill: "tozeroy", fillcolor: "rgba(220,53,69,0.25)" }),
+          ...(shaded && { fill: "tonexty", fillcolor: "rgba(220,53,69,0.25)" }),
         },
         {
           x: [eqd2, eqd2],
