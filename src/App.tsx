@@ -82,90 +82,6 @@ export default function App() {
     }
   };
 
-  /*************************   TCP / NTCP helper  *************************/
-  const buildSigmoid = (
-    D50: number,
-    gamma50: number,
-    doses: number[],
-  ): number[] =>
-    doses.map(
-      (D) => 1 / (1 + Math.exp(-4 * gamma50 * (D - D50) / D50)),
-    );
-
-  return (
-    <Container maxWidth="sm" sx={{ mt: 4, fontFamily: "sans-serif" }}>
-      <Paper sx={{ p: 3 }} elevation={3}>
-        <h2>Radiobiology Calculator</h2>
-
-        {/* ---------- input fields ---------- */}
-        <Stack spacing={2}>
-          <FormControl fullWidth>
-            <InputLabel>Tumour model</InputLabel>
-            <Select
-              value={tumourIdx}
-              label="Tumour model"
-              onChange={handleTumourSelect}
-            >
-              {tumourOptions.map((opt, i) => (
-                <MenuItem key={opt.label} value={i}>{opt.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <FormControl fullWidth>
-            <InputLabel>Normal tissue model</InputLabel>
-            <Select
-              value={oarIdx}
-              label="Normal tissue model"
-              onChange={handleOarSelect}
-            >
-              {oarOptions.map((opt, i) => (
-                <MenuItem key={opt.label} value={i}>{opt.label}</MenuItem>
-              ))}
-            </Select>
-          </FormControl>
-
-          <TextField
-            label="α / β Tumor (Gy)"
-            type="number"
-            value={inp.abTumor}
-            onChange={handleChange("abTumor")}
-          />
-          <TextField
-            label="α / β Normal tissue (Gy)"
-            type="number"
-            value={inp.abOAR}
-            onChange={handleChange("abOAR")}
-          />
-          <TextField
-            label="Dose / fraction (Gy)"
-            type="number"
-            value={inp.d}
-            onChange={handleChange("d")}
-          />
-          <TextField
-            label="# Fractions"
-            type="number"
-            value={inp.n}
-            onChange={handleChange("n")}
-          />
-          <TextField
-            label="Overall time (days)"
-            type="number"
-            value={inp.t}
-            onChange={handleChange("t")}
-          />
-          <Button
-            variant="contained"
-            onClick={calc}
-            disabled={
-              loading ||
-              [inp.d, inp.n, inp.t, inp.abTumor].some((v) => !v && v !== 0)
-            }
-          >
-            {loading ? "Calculating…" : "Calculate"}
-          </Button>
-        </Stack>
 
 {/* ---------- results ---------- */}
 {res && (
@@ -181,7 +97,9 @@ export default function App() {
     </pre>
 
     {/* tabs */}
-    <Tabs value={tab} onChange={(_, v) => setTab(v)} centered sx={{ mb: 1 }}>
+    <Tabs value={tab} onChange={(_, v) => setTab(v)}   variant="scrollable"
+    scrollButtons="auto"
+    sx={{ mb: 1 }}>
       <Tab label="Cell survival" />
       <Tab label="TCP / NTCP (lines)" />
       <Tab label="TCP / NTCP (shaded)" />
