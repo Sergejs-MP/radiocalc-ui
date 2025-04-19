@@ -32,11 +32,20 @@ interface GapResult {
 }
 // result type from backend
 interface Result {
+tumour: {
   total_dose: number;
   bed: number;
   eqd2: number;
   time_corrected_bed: number;
   survival_fraction: number;
+};
+oar: {
+  total_dose: number;
+  bed: number;
+  eqd2: number;
+  time_corrected_bed: number;
+  survival_fraction: number;
+};
   gap?: GapResult;
   oarStatus?: "ok" | "warn" | "fail";  
 }
@@ -87,12 +96,15 @@ export default function App() {
     setLoading(true);
     try {
       // 1. normal BED/EQD2 request
-      const { data } = await axios.post<Result>(API, {
-        dose_per_fraction: inp.d,
-        number_of_fractions: inp.n,
-        treatment_time: inp.t,
-        alpha_beta: inp.abTumour,
-      });
+      const { data } = await axios.post(
+        API.replace("/calculate", "/calculate_dual") + `?oar_ab=${inp.abOAR}`,
+        {
+          dose_per_fraction: inp.d,
+          number_of_fractions: inp.n,
+          treatment_time: inp.t,
+          alpha_beta: inp.abTumour,     // tumour α/β
+        }
+      );
   
       // 2. gap‑compensation request (only if gap > 0)
       let gapData: GapResult | undefined = undefined;
@@ -114,7 +126,7 @@ export default function App() {
 
     let oarStatus: "ok" | "warn" | "fail" | null = null;
     if (limit !== undefined) {
-      const ratio = data.eqd2 / limit;
+      const ratio = data.oar.eqd2 / limit;
       if (ratio >= 1)        oarStatus = "fail";   // exceeds limit
       else if (ratio >= 0.9) oarStatus = "warn";   // within 10 %
       else                   oarStatus = "ok";
