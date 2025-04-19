@@ -120,8 +120,8 @@ export default function App() {
       );
   
       // 2. gap‑compensation request (only if gap > 0)
-      let gapData: GapResult | undefined = undefined;
-      if (inp.gap && inp.gap > 0) {
+      let gapData: GapResult | undefined;
+      if (inp.gap > 0) {
         const { data: gapRes } = await axios.post<GapResult>(
           API.replace("/calculate", "/gap_compensation"),
           {
@@ -133,20 +133,26 @@ export default function App() {
         );
         gapData = gapRes;
       }
+      
 
 
 
-          // ── 1. look up the QUANTEC limit for the selected OAR
-    const primaryOar = data.oars[0];
-    const limit = oarLimits[primaryOar.label] as number | undefined;
+      /* ─────────────────────────────────────────────────────────
+        NEW: pick the worst‑case OAR and derive traffic‑light
+      ────────────────────────────────────────────────────────── */
+      const worst = data.oars.reduce<OarResult>((acc, o) => {
+        const lim = oarLimits[o.label] ?? Infinity;
+        return o.eqd2 / lim > acc.eqd2 / (oarLimits[acc.label] ?? Infinity)
+          ? o
+          : acc;
+      }, data.oars[0]);
 
-    let oarStatus: "ok" | "warn" | "fail" | null = null;
-    if (limit !== undefined) {
-      const ratio = data.oar.eqd2 / limit;
-      if (ratio >= 1)        oarStatus = "fail";   // exceeds limit
-      else if (ratio >= 0.9) oarStatus = "warn";   // within 10 %
-      else                   oarStatus = "ok";
-    }
+      const limit = oarLimits[worst.label] as number | undefined;
+      let oarStatus: "ok" | "warn" | "fail" | null = null;
+      if (limit !== undefined) {
+        const ratio = worst.eqd2 / limit;
+        oarStatus = ratio >= 1 ? "fail" : ratio >= 0.9 ? "warn" : "ok";
+      }
 
   
       setRes({ ...data, gap: gapData, oarStatus, primaryOar  });
@@ -279,30 +285,22 @@ export default function App() {
                 {res.gap.extra_fractions !== 1 && "s"}.
               </Box>
             )}
-            {res.oarStatus && (
-              <Alert
-                severity={
-                  res.oarStatus === "fail"
-                    ? "error"
-                    : res.oarStatus === "warn"
-                    ? "warning"
-                    : "success"
-                }
-                sx={{ mb: 2 }}
-              >
-                {res.oarStatus === "fail" && (
-                  <>EQD₂ {res.primaryOar!.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
-                  {oarLimits[oarOptions[oarIdx].label]} Gy for&nbsp;
-                  <b>{oarOptions[oarIdx].label}</b>.</>
-                )}
-                {res.oarStatus === "warn" && (
-                 <>EQD₂ is {(100 * res.primaryOar!.eqd2 / limit).toFixed(0)} %
-                  of limit ({res.primaryOar!.eqd2.toFixed(1)} / {limit} Gy).</>               )}
-                {res.oarStatus === "ok" && (
-                  <>EQD₂ {res.primaryOar!.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
-                )}
-              </Alert>
-            )}
+              {res.oarStatus && res.primaryOar && (
+                <Alert severity={...}>
+                  {res.oarStatus === "fail" && (
+                    <>EQD₂ {res.primaryOar.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
+                    {oarLimits[res.primaryOar.label]} Gy for&nbsp;
+                    <b>{res.primaryOar.label}</b>.</>
+                  )}
+                  {res.oarStatus === "warn" && (
+                    <>EQD₂ is {(100*res.primaryOar.eqd2/oarLimits[res.primaryOar.label]).toFixed(0)} %
+                    of limit ({res.primaryOar.eqd2.toFixed(1)} Gy).</>
+                  )}
+                  {res.oarStatus === "ok" && (
+                    <>EQD₂ {res.primaryOar.eqd2.toFixed(1)} Gy is below QUANTEC limit for {res.primaryOar.label}.</>
+                  )}
+                </Alert>
+              )}
             <Tabs
               value={tab}
               onChange={(_, v) => setTab(v)}
