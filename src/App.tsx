@@ -146,6 +146,13 @@ export default function App() {
         NEW: pick the worst‑case OAR and derive traffic‑light
       ────────────────────────────────────────────────────────── */
       type OarResult = Result["oars"][number];
+
+      const oarsWithLimits = data.oars.filter(o => oarLimits[o.label] !== undefined);
+      if (!oarsWithLimits.length) {
+        setRes({ ...data, gap: gapData, oarStatus: null });
+        setTab(0);
+        return;
+      }
       const worst = data.oars.reduce<OarResult>((acc, o) => {
         const lim = oarLimits[o.label] ?? Infinity;
         return o.eqd2 / lim > acc.eqd2 / (oarLimits[acc.label] ?? Infinity)
