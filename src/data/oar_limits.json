@@ -1,0 +1,9 @@
+{
+    "Spinal cord (α/β 3 Gy)":   50,
+    "Brainstem (α/β 2 Gy)":     54,
+    "Optic nerve/chiasm (α/β 2 Gy)": 55,
+    "Kidney late (α/β 3 Gy)":   23,
+    "Heart (α/β 3 Gy)":         40,
+    "Rectum late (α/β 3 Gy)":   75,
+    "Lung late (α/β 3 Gy)":     65
+  }

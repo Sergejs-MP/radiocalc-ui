@@ -42,6 +42,7 @@ interface Result {
 // preset dropdown options
 import tumourOptions from "./data/tumour_presets.json";
 import oarOptions from "./data/oar_presets.json";
+import oarLimits from "./data/oar_limits.json";
 
 export default function App() {
   // form state
@@ -105,8 +106,20 @@ export default function App() {
         );
         gapData = gapRes;
       }
+
+          // ── 1. look up the QUANTEC limit for the selected OAR
+    const limit = oarLimits[oarOptions[oarIdx].label] as number | undefined;
+
+    let oarStatus: "ok" | "warn" | "fail" | null = null;
+    if (limit !== undefined) {
+      const ratio = data.eqd2 / limit;
+      if (ratio >= 1)        oarStatus = "fail";   // exceeds limit
+      else if (ratio >= 0.9) oarStatus = "warn";   // within 10 %
+      else                   oarStatus = "ok";
+    }
+
   
-      setRes({ ...data, gap: gapData });
+      setRes({ ...data, gap: gapData, oarStatus });
       setTab(0);
     } catch (err) {
       console.error(err);
@@ -225,6 +238,31 @@ export default function App() {
                 <b>{res.gap.extra_fractions}</b>&nbsp;extra&nbsp;fraction
                 {res.gap.extra_fractions !== 1 && "s"}.
               </Box>
+            )}
+            {res.oarStatus && (
+              <Alert
+                severity={
+                  res.oarStatus === "fail"
+                    ? "error"
+                    : res.oarStatus === "warn"
+                    ? "warning"
+                    : "success"
+                }
+                sx={{ mb: 2 }}
+              >
+                {res.oarStatus === "fail" && (
+                  <>EQD₂ {res.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
+                  {oarLimits[oarOptions[oarIdx].label]} Gy for&nbsp;
+                  <b>{oarOptions[oarIdx].label}</b>.</>
+                )}
+                {res.oarStatus === "warn" && (
+                  <>EQD₂ is {(100*res.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
+                  of limit ({res.eqd2.toFixed(1)} / { oarLimits[oarOptions[oarIdx].label] } Gy).</>
+                )}
+                {res.oarStatus === "ok" && (
+                  <>EQD₂ {res.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
+                )}
+              </Alert>
             )}
             <Tabs
               value={tab}
