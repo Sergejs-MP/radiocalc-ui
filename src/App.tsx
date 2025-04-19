@@ -115,7 +115,6 @@ export default function App() {
           number_of_fractions: inp.n,
           treatment_time: inp.t,
           tumour_ab: inp.abTumour,
-          oars: selectedOARs.map(({ label, ab }) => ({ label, alpha_beta: ab })),
           oars: oarModels.map(({ label, ab }) => ({ label, alpha_beta: ab })),
         }
       );
