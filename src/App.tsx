@@ -291,16 +291,15 @@ export default function App() {
                 sx={{ mb: 2 }}
               >
                 {res.oarStatus === "fail" && (
-                  <>EQD₂ {{res.primaryOar!.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
+                  <>EQD₂ {res.primaryOar!.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
                   {oarLimits[oarOptions[oarIdx].label]} Gy for&nbsp;
                   <b>{oarOptions[oarIdx].label}</b>.</>
                 )}
                 {res.oarStatus === "warn" && (
-                  <>EQD₂ is {(100*res.primaryOar!.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
-                  of limit ({res.oar.eqd2.toFixed(1)} / { oarLimits[oarOptions[oarIdx].label] } Gy).</>
-                )}
+                 <>EQD₂ is {(100 * res.primaryOar!.eqd2 / limit).toFixed(0)} %
+                  of limit ({res.primaryOar!.eqd2.toFixed(1)} / {limit} Gy).</>               )}
                 {res.oarStatus === "ok" && (
-                  <>EQD₂ {res.oar.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
+                  <>EQD₂ {res.primaryOar!.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
                 )}
               </Alert>
             )}
