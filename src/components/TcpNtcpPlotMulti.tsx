@@ -22,9 +22,10 @@ const buildSigmoid = (
   doses.map((D) => 1 / (1 + Math.exp(-4 * gamma50 * (D - D50) / D50)));
 
 export default function TcpNtcpPlotMulti({
-  eqd2,
   tumour,
   oars,
+  eqd2Tumour,
+  eqd2Oars,
 }: Props) {
   const doseAxis = Array.from({ length: 101 }, (_, i) => i); // 0‑100 Gy
 
