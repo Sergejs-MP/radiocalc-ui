@@ -353,10 +353,11 @@ export default function App() {
             )}
 
             {tab === 1 && (
+              <TcpNtcpPlot
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
                 eqd2Tumour={res.tumour.eqd2}
-                eqd2Oar={res.primaryOar?.eqd2 ?? res.oars[0].eqd2}
+                eqd2Oar={res.primaryOar ? res.primaryOar.eqd2 : res.oars[0].eqd2}
               />
             )}
 
@@ -366,7 +367,7 @@ export default function App() {
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
                 eqd2Tumour={res.tumour.eqd2}
-                eqd2Oar={res.primaryOar?.eqd2 ?? res.oars[0].eqd2}
+                eqd2Oar={res.primaryOar ? res.primaryOar.eqd2 : res.oars[0].eqd2}
                 shaded
               />
             )}
