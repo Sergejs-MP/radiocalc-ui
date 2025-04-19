@@ -26,17 +26,7 @@ import {
 // backend URL
 const API = import.meta.env.VITE_API + "/calculate";
 
-const [selectedOARs, setSelectedOARs] = useState<typeof oarOptions>([]);
-const oarModels = selectedOARs.length ? selectedOARs : [oarOptions[oarIdx]];
 
-<Autocomplete
-  multiple
-  options={oarOptions}
-  getOptionLabel={(opt) => opt.label}
-  value={selectedOARs}
-  onChange={(_, v) => setSelectedOARs(v)}
-  renderInput={(params) => <TextField {...params} label="Select OARs" />}
-/>
 
 interface GapResult {
   bed_lost: number;
@@ -86,6 +76,11 @@ export default function App() {
   const [loading, setLoading] = useState(false);
   const [tumourIdx, setTumourIdx] = useState(0);
   const [oarIdx, setOarIdx] = useState(0);
+  const [selectedOARs, setSelectedOARs] = useState<typeof oarOptions>([]);
+
+  const oarModels = selectedOARs.length ? selectedOARs : [oarOptions[oarIdx]];
+
+
 
   /* ---------- handlers ---------- */
   const handleChange =
@@ -110,13 +105,16 @@ export default function App() {
     setLoading(true);
     try {
       // 1. normal BED/EQD2 request
-      const { data } = await axios.post("/calculate_multi", {
-        dose_per_fraction: inp.d,
-        number_of_fractions: inp.n,
-        treatment_time: inp.t,
-        tumour_ab: inp.abTumour,
-        oars: selectedOARs.map(({ label, ab }) => ({ label, alpha_beta: ab })),
-      });
+      const { data } = await axios.post(
+        API.replace("/calculate", "/calculate_multi"),   // keeps base URL
+        {
+          dose_per_fraction: inp.d,
+          number_of_fractions: inp.n,
+          treatment_time: inp.t,
+          tumour_ab: inp.abTumour,
+          oars: selectedOARs.map(({ label, ab }) => ({ label, alpha_beta: ab })),
+        }
+      );
   
       // 2. gap‑compensation request (only if gap > 0)
       let gapData: GapResult | undefined = undefined;
@@ -193,6 +191,16 @@ export default function App() {
               ))}
             </Select>
           </FormControl>
+
+          <Autocomplete
+            multiple
+            options={oarOptions}
+            getOptionLabel={(option) => option.label}
+            onChange={(_, value) => setSelectedOARs(value)}
+            renderInput={(params) => (
+              <TextField {...params} label="OAR models" />
+            )}
+            />
 
           <TextField
             label="α / β Tumour (Gy)"
@@ -334,7 +342,7 @@ export default function App() {
                 oar={oarOptions[oarIdx]}
               />
             )}
-            
+
 
             {tab === 2 && (
               <TcpNtcpPlot
