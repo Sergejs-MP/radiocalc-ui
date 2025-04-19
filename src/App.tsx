@@ -116,6 +116,7 @@ export default function App() {
           treatment_time: inp.t,
           tumour_ab: inp.abTumour,
           oars: selectedOARs.map(({ label, ab }) => ({ label, alpha_beta: ab })),
+          oars: oarModels.map(({ label, ab }) => ({ label, alpha_beta: ab })),
         }
       );
   
@@ -135,7 +136,11 @@ export default function App() {
       }
       
 
-
+      if (!data.oars.length) {
+        setRes({ ...data, gap: gapData, oarStatus: null });
+        setTab(0);
+        return;
+      }
 
       /* ─────────────────────────────────────────────────────────
         NEW: pick the worst‑case OAR and derive traffic‑light
