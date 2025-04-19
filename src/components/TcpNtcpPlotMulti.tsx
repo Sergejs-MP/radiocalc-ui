@@ -9,7 +9,9 @@ export interface TissueModel {
 interface Props {
   eqd2: number;                 // plan EQD2 (tumour or total)
   tumour: TissueModel;          // single tumour model
-  oars: TissueModel[];          // 0‑N OAR models
+  oars: TissueModel[];
+  eqd2Tumour: number;
+  eqd2Oars: number[];          // 0‑N OAR models
 }
 
 const buildSigmoid = (
@@ -56,12 +58,20 @@ export default function TcpNtcpPlotMulti({
         }),
         /* EQD2 vertical marker */
         {
-          x: [eqd2, eqd2],
+          x: [eqd2Tumour, eqd2Tumour],
           y: [0, 1],
-          name: `Plan EQD₂ = ${eqd2.toFixed(1)} Gy`,
+          name: `Plan EQD₂ = ${eqd2Tumour.toFixed(1)} Gy`,
           mode: "lines",
           line: { dash: "dash" },
         },
+        /* OAR markers, color‑matched */
+        ...oars.map((oar, i) => ({
+          x: [eqd2Oars[i], eqd2Oars[i]],
+          y: [0, 1],
+          name: `${oar.label} EQD₂ ${eqd2Oars[i].toFixed(1)} Gy`,
+          mode: "lines",
+          line: { dash: "dot", width: 1, color: `hsla(${baseHue + i*hueStep},70%,40%,1)` },
+        })),
       ]}
       layout={{
         title: "TCP / NTCP overlay",

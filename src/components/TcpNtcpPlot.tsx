@@ -10,6 +10,8 @@ interface Props {
   eqd2: number;
   tumour: TissueModel;
   oar: TissueModel;
+  eqd2Tumour: number;
+  eqd2Oar:    number;
   shaded?: boolean;
 }
 
@@ -48,12 +50,20 @@ export default function TcpNtcpPlot({
           ...(shaded && { fill: "tonexty", fillcolor: "rgba(220,53,69,0.25)" }),
         },
         {
-          x: [eqd2, eqd2],
+          x: [eqd2Tumour, eqd2Tumour],
           y: [0, 1],
-          name: `Plan EQD₂ = ${eqd2.toFixed(1)} Gy`,
+          name: `Plan EQD₂ = ${eqd2Tumour.toFixed(1)} Gy`,
           type: "scatter",
           mode: "lines",
           line: { dash: "dash" },
+        },
+        {
+          x: [eqd2Oar, eqd2Oar],
+          y: [0, 1],
+          name: `${oar.label} EQD₂ ${eqd2Oar.toFixed(1)} Gy`,
+          type: "scatter",
+          mode: "lines",
+          line: { dash: "dash", color: "rgb(220, 53, 69)" }, // same red as OAR curve
         },
       ]}
       layout={{
