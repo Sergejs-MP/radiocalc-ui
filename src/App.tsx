@@ -374,7 +374,6 @@ export default function App() {
 
             {tab === 3 && res && (
               <TcpNtcpPlotMulti
-                eqd2={res.tumour.eqd2}
                 tumour={{ label: tumourOptions[tumourIdx].label, D50: tumourOptions[tumourIdx].D50, gamma50: tumourOptions[tumourIdx].gamma50 }}
                 oars={oarModels.map(o => ({
                   label: o.label,
