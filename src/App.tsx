@@ -18,6 +18,7 @@ import {
   InputLabel,
   MenuItem,
   Select,
+  Alert,
 } from "@mui/material";
 
 // backend URL
@@ -36,7 +37,8 @@ interface Result {
   eqd2: number;
   time_corrected_bed: number;
   survival_fraction: number;
-  gap?: GapResult;  
+  gap?: GapResult;
+  oarStatus?: "ok" | "warn" | "fail";  
 }
 
 // preset dropdown options
