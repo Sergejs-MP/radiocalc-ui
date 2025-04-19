@@ -286,7 +286,11 @@ export default function App() {
               </Box>
             )}
               {res.oarStatus && res.primaryOar && (
-                <Alert severity={...}>
+                <Alert severity={      res.oarStatus === "fail"
+                  ? "error"
+                  : res.oarStatus === "warn"
+                  ? "warning"
+                  : "success"}>
                   {res.oarStatus === "fail" && (
                     <>EQD₂ {res.primaryOar.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
                     {oarLimits[res.primaryOar.label]} Gy for&nbsp;
