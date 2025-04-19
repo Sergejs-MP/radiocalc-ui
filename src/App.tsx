@@ -126,7 +126,7 @@ export default function App() {
 
     let oarStatus: "ok" | "warn" | "fail" | null = null;
     if (limit !== undefined) {
-      const ratio = res.oar.eqd2 / limit;
+      const ratio = data.oar.eqd2 / limit;
       if (ratio >= 1)        oarStatus = "fail";   // exceeds limit
       else if (ratio >= 0.9) oarStatus = "warn";   // within 10 %
       else                   oarStatus = "ok";
