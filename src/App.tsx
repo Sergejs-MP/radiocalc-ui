@@ -2,6 +2,8 @@ import { useState } from "react";
 import axios from "axios";
 import Plot from "react-plotly.js";
 import TcpNtcpPlot from "./components/TcpNtcpPlot";
+import TcpNtcpPlotMulti from "./components/TcpNtcpPlotMulti";
+import Autocomplete from "@mui/material/Autocomplete";
 
 import {
   Container,
@@ -23,6 +25,18 @@ import {
 
 // backend URL
 const API = import.meta.env.VITE_API + "/calculate";
+
+const [selectedOARs, setSelectedOARs] = useState<typeof oarOptions>([]);
+const oarModels = selectedOARs.length ? selectedOARs : [oarOptions[oarIdx]];
+
+<Autocomplete
+  multiple
+  options={oarOptions}
+  getOptionLabel={(opt) => opt.label}
+  value={selectedOARs}
+  onChange={(_, v) => setSelectedOARs(v)}
+  renderInput={(params) => <TextField {...params} label="Select OARs" />}
+/>
 
 interface GapResult {
   bed_lost: number;
@@ -96,15 +110,13 @@ export default function App() {
     setLoading(true);
     try {
       // 1. normal BED/EQD2 request
-      const { data } = await axios.post(
-        API.replace("/calculate", "/calculate_dual") + `?oar_ab=${inp.abOAR}`,
-        {
-          dose_per_fraction: inp.d,
-          number_of_fractions: inp.n,
-          treatment_time: inp.t,
-          alpha_beta: inp.abTumour,     // tumour α/β
-        }
-      );
+      const { data } = await axios.post("/calculate_multi", {
+        dose_per_fraction: inp.d,
+        number_of_fractions: inp.n,
+        treatment_time: inp.t,
+        tumour_ab: inp.abTumour,
+        oars: selectedOARs.map(({ label, ab }) => ({ label, alpha_beta: ab })),
+      });
   
       // 2. gap‑compensation request (only if gap > 0)
       let gapData: GapResult | undefined = undefined;
@@ -120,6 +132,8 @@ export default function App() {
         );
         gapData = gapRes;
       }
+
+
 
           // ── 1. look up the QUANTEC limit for the selected OAR
     const limit = oarLimits[oarOptions[oarIdx].label] as number | undefined;
@@ -288,6 +302,9 @@ export default function App() {
               <Tab label="Cell survival" />
               <Tab label="TCP / NTCP (lines)" />
               <Tab label="TCP / NTCP (shaded)" />
+              {selectedOARs.length > 1 && (
+                <Tab label="TCP / NTCP (multi)" />
+              )}
             </Tabs>
 
             {tab === 0 && (
@@ -324,6 +341,18 @@ export default function App() {
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
                 shaded
+              />
+            )}
+
+            {tab === 3 && res && (
+              <TcpNtcpPlotMulti
+                eqd2={res.tumour.eqd2}
+                tumour={{ label: tumourOptions[tumourIdx].label, D50: tumourOptions[tumourIdx].D50, gamma50: tumourOptions[tumourIdx].gamma50 }}
+                oars={oarModels.map(o => ({
+                  label: o.label,
+                  D50: o.D50,
+                  gamma50: o.gamma50,
+                }))}
               />
             )}
           </Box>
