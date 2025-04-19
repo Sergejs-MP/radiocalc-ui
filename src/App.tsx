@@ -126,7 +126,7 @@ export default function App() {
 
     let oarStatus: "ok" | "warn" | "fail" | null = null;
     if (limit !== undefined) {
-      const ratio = data.oar.eqd2 / limit;
+      const ratio = res.oar.eqd2 / limit;
       if (ratio >= 1)        oarStatus = "fail";   // exceeds limit
       else if (ratio >= 0.9) oarStatus = "warn";   // within 10 %
       else                   oarStatus = "ok";
@@ -265,16 +265,16 @@ export default function App() {
                 sx={{ mb: 2 }}
               >
                 {res.oarStatus === "fail" && (
-                  <>EQD₂ {res.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
+                  <>EQD₂ {res.oar.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
                   {oarLimits[oarOptions[oarIdx].label]} Gy for&nbsp;
                   <b>{oarOptions[oarIdx].label}</b>.</>
                 )}
                 {res.oarStatus === "warn" && (
-                  <>EQD₂ is {(100*res.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
-                  of limit ({res.eqd2.toFixed(1)} / { oarLimits[oarOptions[oarIdx].label] } Gy).</>
+                  <>EQD₂ is {(100*res.oar.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
+                  of limit ({res.oar.eqd2.toFixed(1)} / { oarLimits[oarOptions[oarIdx].label] } Gy).</>
                 )}
                 {res.oarStatus === "ok" && (
-                  <>EQD₂ {res.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
+                  <>EQD₂ {res.oar.eqd2.toFixed(1)} Gy is below QUANTEC limit.</>
                 )}
               </Alert>
             )}
@@ -294,8 +294,8 @@ export default function App() {
               <Plot
                 data={[
                   {
-                    x: [0, res.total_dose],
-                    y: [1, res.survival_fraction],
+                    x: [0, res.tumour.total_dose],
+                    y: [1, res.tumour.survival_fraction],
                     type: "scatter",
                     mode: "lines+markers",
                     name: "Tumour survival",
@@ -312,7 +312,7 @@ export default function App() {
 
             {tab === 1 && (
               <TcpNtcpPlot
-                eqd2={res.eqd2}
+                eqd2={res.oar.eqd2}
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
               />
@@ -320,7 +320,7 @@ export default function App() {
 
             {tab === 2 && (
               <TcpNtcpPlot
-                eqd2={res.eqd2}
+                eqd2={res.oar.eqd2}
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
                 shaded
