@@ -43,12 +43,15 @@ tumour: {
   time_corrected_bed: number;
   survival_fraction: number;
 };
-oar: {
-  total_dose: number;
-  bed: number;
+oars: {
+  label: string;
   eqd2: number;
-  time_corrected_bed: number;
-  survival_fraction: number;
+  bed: number;
+  /* add other fields if you return them */
+}[];
+primaryOar?: {          // ← new helper field you add in calc()
+  label: string;
+  eqd2: number;
 };
   gap?: GapResult;
   oarStatus?: "ok" | "warn" | "fail";  
@@ -134,7 +137,8 @@ export default function App() {
 
 
           // ── 1. look up the QUANTEC limit for the selected OAR
-    const limit = oarLimits[oarOptions[oarIdx].label] as number | undefined;
+    const primaryOar = data.oars[0];
+    const limit = oarLimits[primaryOar.label] as number | undefined;
 
     let oarStatus: "ok" | "warn" | "fail" | null = null;
     if (limit !== undefined) {
@@ -145,7 +149,7 @@ export default function App() {
     }
 
   
-      setRes({ ...data, gap: gapData, oarStatus });
+      setRes({ ...data, gap: gapData, oarStatus, primaryOar  });
       setTab(0);
     } catch (err) {
       console.error(err);
@@ -287,12 +291,12 @@ export default function App() {
                 sx={{ mb: 2 }}
               >
                 {res.oarStatus === "fail" && (
-                  <>EQD₂ {res.oar.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
+                  <>EQD₂ {{res.primaryOar!.eqd2.toFixed(1)} Gy exceeds QUANTEC limit
                   {oarLimits[oarOptions[oarIdx].label]} Gy for&nbsp;
                   <b>{oarOptions[oarIdx].label}</b>.</>
                 )}
                 {res.oarStatus === "warn" && (
-                  <>EQD₂ is {(100*res.oar.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
+                  <>EQD₂ is {(100*res.primaryOar!.eqd2/ oarLimits[oarOptions[oarIdx].label]).toFixed(0)} %
                   of limit ({res.oar.eqd2.toFixed(1)} / { oarLimits[oarOptions[oarIdx].label] } Gy).</>
                 )}
                 {res.oarStatus === "ok" && (
@@ -337,7 +341,7 @@ export default function App() {
 
             {tab === 1 && (
               <TcpNtcpPlot
-                eqd2={res.oar.eqd2}
+              eqd2={res.tumour.eqd2}
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
               />
@@ -346,7 +350,7 @@ export default function App() {
 
             {tab === 2 && (
               <TcpNtcpPlot
-                eqd2={res.oar.eqd2}
+              eqd2={res.tumour.eqd2}
                 tumour={tumourOptions[tumourIdx]}
                 oar={oarOptions[oarIdx]}
                 shaded
