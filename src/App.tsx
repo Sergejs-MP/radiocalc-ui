@@ -181,8 +181,13 @@ export default function App() {
       setRes({ ...data, gap: gapData, oarStatus, primaryOar: worst }); 
       setTab(0);
     } catch (err) {
-      console.error(err);
-      alert("Calculation failed – see console");
+      if (axios.isAxiosError(err) && err.response) {
+        console.error("API error:", err.response.data);
+        alert(JSON.stringify(err.response.data, null, 2));
+      } else {
+        console.error(err);
+        alert("Unexpected error – see console");
+      }
     } finally {
       setLoading(false);
     }
