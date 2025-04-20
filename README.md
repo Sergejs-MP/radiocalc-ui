@@ -1,54 +1,98 @@
-# React + TypeScript + Vite
+---
+## radiocalc-ui/README.md
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+```markdown
+# Radiocalc UI – Vite + React + MUI
 
-Currently, two official plugins are available:
+Frontend SPA that talks to the FastAPI backend and visualises survival, TCP/NTCP curves, QUANTEC limits, and OAR risk.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+---
+## Table of Contents
+1. [Quick start](#quick-start)
+2. [Project layout](#project-layout)
+3. [Running in development](#running-in-development)
+4. [Environment variables](#environment-variables)
+5. [Build & deploy](#build--deploy)
 
-## Expanding the ESLint configuration
+### Quick start
+```bash
+# inside radiocalc-ui/
+npm install
+npm run dev           # default http://localhost:5173
+````
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+### Project layout
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+```
+radiocalc-ui/
+├── src/
+│   ├── App.tsx              # main component
+│   ├── components/
+│   │   ├── TcpNtcpPlot.tsx
+│   │   └── TcpNtcpPlotMulti.tsx
+│   ├── data/                # JSON presets & limits
+│   └── index.tsx
+├── public/
+├── vite.config.ts
+├── package.json
+└── README.md                # you are here
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Running in development
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+- Backend must be running on another port (e.g. 8000).
+- Create `.env`:
+  ```env
+  VITE_API=http://localhost:8000
+  ```
+- `npm run dev` – opens hmr server; auto‑reloads on save.
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+### Environment variables
+
+| Variable   | Purpose                     |
+| ---------- | --------------------------- |
+| `VITE_API` | Base URL of FastAPI backend |
+
+### Build & Deploy
+
+```bash
+npm run build           # generates dist/
+```
+
+#### Netlify
+
+- Point site to **radiocalc-ui/**, build command `npm run build`, publish `dist/`.
+- Add environment var `VITE_API` in Netlify dashboard.
+
+#### GitHub Pages (static)
+
+```bash
+npm install -g serve
+serve -s dist
+```
+
+---
+
+### Feature flags & folders
+
+| Folder                         | Purpose                      |
+| ------------------------------ | ---------------------------- |
+| `src/data/tumour_presets.json` | default tumour α/β, D50, γ₅₀ |
+| `src/data/oar_limits.json`     | QUANTEC limits table         |
+| `src/components/*Plot*.tsx`    | Plotly renderers             |
+
+---
+
+### Development notes
+
+- Uses **Material‑UI v5** – theme overrides in `src/theme.ts` (optional).
+- Plot colours follow MUI primary (`#2196f3`) and error (`#dc3545`).
+- State management is kept in `App.tsx`; no Redux.
+- For analytics, call `posthog.capture()` after each successful calc (optional).
+
+```
+
+---
+Copy each block into the respective folder (`backend/README.md`, `radiocalc-ui/README.md`) or leave this single collection file at project root if you prefer.
+
 ```
