@@ -83,7 +83,8 @@ export default function App() {
 
   const oarModels = selectedOARs.length ? selectedOARs : [oarOptions[oarIdx]];
 
-
+  const [risk, setRisk] = useState(10);          // %
+  const [limit, setLimit] = useState<number|null>(null);
 
   /* ---------- handlers ---------- */
   const handleChange =
@@ -118,6 +119,15 @@ export default function App() {
           oars: oarModels.map(({ label, ab }) => ({ label, alpha_beta: ab })),
         }
       );
+
+      const { data: limitRes } = await axios.post("/oar_max_dose", {
+        D50: oarOptions[oarIdx].D50,
+        gamma50: oarOptions[oarIdx].gamma50,
+        prob: risk/100,
+        alpha_beta: inp.abOAR,
+        dose_per_fraction: inp.d,
+      });
+      setLimit(limitRes.eqd2_limit);
   
       // 2. gap‑compensation request (only if gap > 0)
       let gapData: GapResult | undefined;
@@ -260,6 +270,10 @@ export default function App() {
             value={inp.gap}
             onChange={handleChange("gap")}
           />
+          <Stack direction="row" spacing={1} alignItems="center">
+            <span>Risk&nbsp;{risk}%</span>
+            <Slider value={risk} min={1} max={20} onChange={(_,v)=>setRisk(v as number)} />
+          </Stack>
 
           <Button
             variant="contained"
@@ -315,8 +329,16 @@ export default function App() {
                   {res.oarStatus === "ok" && (
                     <>EQD₂ {res.primaryOar.eqd2.toFixed(1)} Gy is below QUANTEC limit for {res.primaryOar.label}.</>
                   )}
+                  
                 </Alert>
               )}
+              {limit && (
+              <Alert severity="info" sx={{mb:2}}>
+                At {risk}% risk the <b>{oarOptions[oarIdx].label}</b> EQD₂ limit is
+                <b> {limit.toFixed(1)} Gy</b>.
+                Your plan delivers {res.primaryOar?.eqd2.toFixed(1)} Gy.
+              </Alert>
+            )}
             <Tabs
               value={tab}
               onChange={(_, v) => setTab(v)}
