@@ -21,6 +21,7 @@ import {
   MenuItem,
   Select,
   Alert,
+  Slider,
 } from "@mui/material";
 
 // backend URL
