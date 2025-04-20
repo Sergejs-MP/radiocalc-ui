@@ -26,6 +26,7 @@ import {
 
 // backend URL
 const API = import.meta.env.VITE_API + "/calculate";
+const BASE = import.meta.env.VITE_API;
 
 
 
@@ -121,7 +122,7 @@ export default function App() {
         }
       );
 
-      const { data: limitRes } = await axios.post("/oar_max_dose", {
+      const { data: limitRes } = await axios.post(BASE + "/oar_max_dose", {
         D50: oarOptions[oarIdx].D50,
         gamma50: oarOptions[oarIdx].gamma50,
         prob: risk/100,
